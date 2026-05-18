@@ -1,6 +1,6 @@
+from openai import OpenAI
 import streamlit as st
 import pandas as pd
-import random
 
 st.set_page_config(
     page_title="Mameyl Labs AI",
@@ -8,8 +8,10 @@ st.set_page_config(
     layout="wide"
 )
 
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+
 # =========================
-# STYLE PREMIUM
+# STYLE
 # =========================
 st.markdown("""
 <style>
@@ -36,35 +38,17 @@ p, li, label {
     color: #D1D5DB;
 }
 
-.hero-card {
-    background: linear-gradient(135deg, rgba(124,58,237,0.25), rgba(37,99,235,0.18));
-    border: 1px solid rgba(255,255,255,0.12);
-    padding: 35px;
-    border-radius: 24px;
-    box-shadow: 0 20px 45px rgba(0,0,0,0.35);
-}
-
-.tool-card {
-    background: rgba(17,24,39,0.86);
+.hero-card, .tool-card, .output-box {
+    background: rgba(17,24,39,0.88);
     border: 1px solid rgba(255,255,255,0.10);
     padding: 24px;
-    border-radius: 20px;
+    border-radius: 18px;
     margin-bottom: 18px;
 }
 
 .output-box {
-    background: #111827;
     border-left: 5px solid #8B5CF6;
-    padding: 22px;
-    border-radius: 14px;
     color: #E5E7EB;
-}
-
-[data-testid="metric-container"] {
-    background: rgba(17,24,39,0.88);
-    border: 1px solid rgba(255,255,255,0.12);
-    padding: 18px;
-    border-radius: 18px;
 }
 
 .stButton>button {
@@ -81,227 +65,332 @@ p, li, label {
     color: white;
     border-radius: 12px;
 }
-
-.stSelectbox div[data-baseweb="select"] {
-    background-color: #0B1120;
-}
 </style>
 """, unsafe_allow_html=True)
+
+
+# =========================
+# IA FUNCTION
+# =========================
+def ask_ai(system_prompt, user_prompt):
+    with st.spinner("L'IA réfléchit..."):
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            temperature=0.8
+        )
+    return response.choices[0].message.content
+
 
 # =========================
 # SIDEBAR
 # =========================
-st.sidebar.title("✨ Mameyl Labs AI")
-st.sidebar.markdown("### AI Productivity Platform")
+st.sidebar.title("✨ IA de Mameyl Labs")
+st.sidebar.markdown("### Plateforme de productivité IA")
 
 page = st.sidebar.radio(
     "Navigation",
     [
-        "Dashboard",
-        "AI Chat",
-        "Marketing AI",
-        "Business AI",
-        "Content AI",
-        "Summarizer",
-        "Analytics"
+        "Tableau de bord",
+        "Chat IA",
+        "Marketing IA",
+        "IA commerciale",
+        "IA de contenu",
+        "Résumé",
+        "Analytique"
     ]
 )
 
-st.sidebar.info("Modern AI assistant platform built with Python and Streamlit.")
+st.sidebar.info("Plateforme d'assistant IA moderne construite avec Python et Streamlit.")
 
-# =========================
-# SIMULATED DATA
-# =========================
-ideas = [
-    "Launch a short-form video campaign focused on transformation and storytelling.",
-    "Create a premium brand positioning strategy with emotional product benefits.",
-    "Build a weekly content calendar with educational, social proof and product posts.",
-    "Use customer pain points to create targeted captions and campaign hooks.",
-    "Develop a launch campaign with teasers, testimonials and limited-time offers."
-]
-
-business_strategies = [
-    "Focus on customer retention through personalized follow-ups and loyalty offers.",
-    "Automate repetitive communication tasks to save operational time.",
-    "Track product performance weekly to identify best sellers and slow movers.",
-    "Use data dashboards to guide inventory and marketing decisions.",
-    "Build strong brand consistency across website, social media and customer support."
-]
 
 # =========================
 # DASHBOARD
 # =========================
-if page == "Dashboard":
+if page == "Tableau de bord":
+    st.title("✨ Tableau de bord")
+
     st.markdown("""
 <div class="hero-card">
-<h1>✨ Mameyl Labs AI</h1>
-<h3>Modern AI Assistant Platform</h3>
-<p>
-A premium AI productivity platform designed for business, content creation,
-marketing strategy, automation and intelligent decision support.
-</p>
+<h2>Mameyl Labs AI</h2>
+<p>Plateforme IA pour marketing, contenu, stratégie commerciale, résumé et productivité.</p>
 </div>
 """, unsafe_allow_html=True)
 
-    st.markdown("## Platform Overview")
-
     col1, col2, col3, col4 = st.columns(4)
-    col1.metric("AI Requests", "1,284", "+32%")
-    col2.metric("Generated Outputs", "642", "+21%")
-    col3.metric("Automation Ideas", "118", "+14%")
-    col4.metric("Productivity Score", "91%", "+9%")
+    col1.metric("Requêtes IA", "1 284", "+32%")
+    col2.metric("Contenus générés", "642", "+21%")
+    col3.metric("Idées business", "118", "+14%")
+    col4.metric("Score productivité", "91%", "+9%")
 
-    st.markdown("## AI Modules")
+    st.markdown("## Modules IA")
 
     modules = pd.DataFrame({
         "Module": [
-            "AI Chat",
-            "Marketing AI",
-            "Business AI",
-            "Content AI",
-            "Summarizer",
-            "Analytics"
+            "Chat IA",
+            "Marketing IA",
+            "IA commerciale",
+            "IA de contenu",
+            "Résumé",
+            "Analytique"
         ],
-        "Purpose": [
-            "Conversational assistant",
-            "Campaign ideas and hooks",
-            "Business recommendations",
-            "Captions, emails and descriptions",
-            "Text and notes summarization",
-            "AI usage and productivity metrics"
+        "Objectif": [
+            "Assistant conversationnel avec mémoire",
+            "Campagnes, hooks, stratégie réseaux sociaux",
+            "Vente, fidélisation, scripts clients",
+            "Légendes, scripts, emails, descriptions",
+            "Résumé clair et structuré",
+            "Statistiques et performance"
         ],
-        "Status": [
-            "Active",
-            "Active",
-            "Active",
-            "Active",
-            "Active",
-            "Beta"
+        "Statut": [
+            "Actif",
+            "Actif",
+            "Actif",
+            "Actif",
+            "Actif",
+            "Bêta"
         ]
     })
 
     st.dataframe(modules, use_container_width=True)
 
+
 # =========================
-# AI CHAT
+# CHAT IA AVEC MÉMOIRE
 # =========================
-elif page == "AI Chat":
-    st.title("🤖 AI Chat Assistant")
+elif page == "Chat IA":
+    st.title("🤖 Chat IA Assistant")
 
-    st.markdown("""
-<div class="tool-card">
-Ask a question and receive a simulated AI response.  
-This module is designed to later connect with a real AI API.
-</div>
-""", unsafe_allow_html=True)
+    if "messages" not in st.session_state:
+        st.session_state.messages = [
+            {
+                "role": "system",
+                "content": "Tu es un assistant IA professionnel spécialisé en business, marketing, productivité et entrepreneuriat. Réponds toujours clairement en français."
+            }
+        ]
 
-    question = st.text_area("Your message")
-
-    if st.button("Send"):
-        st.markdown("""
+    for msg in st.session_state.messages:
+        if msg["role"] == "user":
+            st.markdown(f"**Vous :** {msg['content']}")
+        elif msg["role"] == "assistant":
+            st.markdown(f"""
 <div class="output-box">
-<strong>AI Response:</strong><br><br>
-This is a simulated AI assistant response. In a production version, this module
-would connect to an AI API to provide contextual and intelligent answers.
+<strong>IA :</strong><br><br>{msg['content']}
 </div>
 """, unsafe_allow_html=True)
 
-# =========================
-# MARKETING AI
-# =========================
-elif page == "Marketing AI":
-    st.title("📈 Marketing AI Generator")
+    user_message = st.text_area("Votre message")
 
-    product = st.text_input("Product or business name")
-    platform = st.selectbox("Platform", ["Instagram", "TikTok", "Facebook", "LinkedIn"])
-    tone = st.selectbox("Tone", ["Premium", "Friendly", "Professional", "Bold", "Luxury"])
+    if st.button("Envoyer") and user_message.strip():
+        st.session_state.messages.append({"role": "user", "content": user_message})
 
-    if st.button("Generate Marketing Ideas"):
+        with st.spinner("L'IA répond..."):
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=st.session_state.messages,
+                temperature=0.8
+            )
+
+        reply = response.choices[0].message.content
+        st.session_state.messages.append({"role": "assistant", "content": reply})
+        st.rerun()
+
+    if st.button("Effacer la conversation"):
+        st.session_state.messages = [
+            {
+                "role": "system",
+                "content": "Tu es un assistant IA professionnel spécialisé en business, marketing, productivité et entrepreneuriat. Réponds toujours clairement en français."
+            }
+        ]
+        st.rerun()
+
+
+# =========================
+# MARKETING IA
+# =========================
+elif page == "Marketing IA":
+    st.title("📈 Générateur Marketing IA")
+
+    marque = st.text_input("Nom de la marque ou du produit")
+    plateforme = st.selectbox("Plateforme", ["Instagram", "TikTok", "Facebook", "LinkedIn"])
+    ton = st.selectbox("Ton", ["Premium", "Amical", "Professionnel", "Audacieux", "Luxe"])
+    objectif = st.text_area("Objectif marketing")
+
+    if st.button("Générer une stratégie marketing"):
+        prompt = f"""
+Marque/produit : {marque}
+Plateforme : {plateforme}
+Ton : {ton}
+Objectif : {objectif}
+
+Crée une vraie stratégie marketing complète, concrète et exploitable.
+Inclure :
+- objectif de campagne
+- concept créatif
+- audience cible
+- 5 hooks
+- 3 idées de publications
+- 2 idées de vidéos
+- CTA
+- calendrier de publication sur 7 jours
+- conseils pour améliorer la conversion
+"""
+
+        reply = ask_ai(
+            "Tu es un expert marketing digital premium spécialisé en réseaux sociaux, branding, campagnes et conversion.",
+            prompt
+        )
+
         st.markdown(f"""
 <div class="output-box">
-<strong>Marketing idea for {product} on {platform}:</strong><br><br>
-{random.choice(ideas)}<br><br>
-Tone selected: <strong>{tone}</strong>
+{reply}
 </div>
 """, unsafe_allow_html=True)
 
-# =========================
-# BUSINESS AI
-# =========================
-elif page == "Business AI":
-    st.title("💼 Business Strategy AI")
 
-    industry = st.selectbox("Industry", ["Beauty", "Technology", "E-commerce", "Fashion", "Education", "Services"])
-    goal = st.text_area("Business goal")
+# =========================
+# IA COMMERCIALE
+# =========================
+elif page == "IA commerciale":
+    st.title("💼 Assistant IA Commercial")
 
-    if st.button("Generate Strategy"):
+    industrie = st.selectbox("Industrie", ["Beauté", "Technologie", "E-commerce", "Mode", "Éducation", "Services"])
+    demande = st.text_area("Objectif commercial ou demande")
+
+    if st.button("Générer une stratégie commerciale"):
+        prompt = f"""
+Industrie : {industrie}
+Demande : {demande}
+
+Réponds comme un expert commercial.
+Selon la demande, produis une réponse adaptée :
+- stratégie de vente
+- fidélisation
+- script WhatsApp
+- gestion des objections
+- closing
+- acquisition client
+- offres promotionnelles
+
+La réponse doit être concrète, utile, prête à utiliser.
+"""
+
+        reply = ask_ai(
+            "Tu es un directeur commercial IA spécialisé en ventes, fidélisation, acquisition client, scripts WhatsApp et conversion.",
+            prompt
+        )
+
         st.markdown(f"""
 <div class="output-box">
-<strong>Strategic recommendation for {industry}:</strong><br><br>
-{random.choice(business_strategies)}<br><br>
-Suggested next step: create measurable KPIs and track progress weekly.
+{reply}
 </div>
 """, unsafe_allow_html=True)
 
-# =========================
-# CONTENT AI
-# =========================
-elif page == "Content AI":
-    st.title("✍️ Content AI Generator")
 
-    content_type = st.selectbox(
-        "Content type",
-        ["Instagram Caption", "LinkedIn Post", "Marketing Email", "Product Description", "Ad Copy"]
+# =========================
+# IA DE CONTENU
+# =========================
+elif page == "IA de contenu":
+    st.title("✍️ Générateur de contenu IA")
+
+    type_contenu = st.selectbox(
+        "Type de contenu",
+        [
+            "Légende Instagram",
+            "Script TikTok",
+            "Email marketing",
+            "Description produit",
+            "Texte publicitaire",
+            "Post Facebook"
+        ]
     )
 
-    topic = st.text_input("Topic")
+    sujet = st.text_input("Sujet")
+    ton = st.selectbox("Ton du contenu", ["Premium", "Simple", "Émotionnel", "Professionnel", "Viral"])
 
-    if st.button("Generate Content"):
+    if st.button("Générer du contenu"):
+        prompt = f"""
+Type de contenu : {type_contenu}
+Sujet : {sujet}
+Ton : {ton}
+
+Crée le contenu directement.
+Ne donne pas des conseils.
+Ne dis pas quoi faire.
+Écris le texte final prêt à publier ou utiliser.
+Ajoute CTA et hashtags si pertinent.
+"""
+
+        reply = ask_ai(
+            "Tu es un créateur de contenu expert en beauté, business, réseaux sociaux, storytelling et copywriting.",
+            prompt
+        )
+
         st.markdown(f"""
 <div class="output-box">
-<strong>{content_type} about {topic}</strong><br><br>
-Create content that is clear, engaging and aligned with the brand voice.
-Highlight the value, benefits and emotional connection with the audience.
+{reply}
 </div>
 """, unsafe_allow_html=True)
 
-# =========================
-# SUMMARIZER
-# =========================
-elif page == "Summarizer":
-    st.title("🧠 Smart Summarizer")
 
-    text = st.text_area("Paste text to summarize")
+# =========================
+# RÉSUMÉ
+# =========================
+elif page == "Résumé":
+    st.title("🧠 Résumeur intelligent")
 
-    if st.button("Summarize"):
-        st.markdown("""
+    texte = st.text_area("Collez le texte à résumer")
+    style = st.selectbox("Style de résumé", ["Court", "Détaillé", "En 3 points", "Professionnel"])
+
+    if st.button("Résumer"):
+        prompt = f"""
+Texte à résumer :
+{texte}
+
+Style demandé : {style}
+
+Fais un vrai résumé clair du texte.
+Garde seulement les idées importantes.
+Ne parle pas du résumé : produis directement le résumé.
+"""
+
+        reply = ask_ai(
+            "Tu es un expert en synthèse, résumé professionnel et clarification de texte.",
+            prompt
+        )
+
+        st.markdown(f"""
 <div class="output-box">
-<strong>Summary:</strong><br><br>
-This text highlights key ideas and can be transformed into a shorter,
-clearer and more actionable summary for business or productivity use.
+<strong>Résumé :</strong><br><br>
+{reply}
 </div>
 """, unsafe_allow_html=True)
 
+
 # =========================
-# ANALYTICS
+# ANALYTIQUE
 # =========================
-elif page == "Analytics":
-    st.title("📊 AI Usage Analytics")
+elif page == "Analytique":
+    st.title("📊 Analytique IA")
 
     data = pd.DataFrame({
-        "Month": ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-        "AI Requests": [120, 240, 310, 460, 620, 850],
-        "Generated Outputs": [80, 160, 220, 330, 470, 642]
+        "Mois": ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin"],
+        "Requêtes IA": [120, 240, 310, 460, 620, 850],
+        "Contenus générés": [80, 160, 220, 330, 470, 642]
     })
 
-    st.line_chart(data.set_index("Month"))
+    st.line_chart(data.set_index("Mois"))
 
     col1, col2, col3 = st.columns(3)
-    col1.metric("Growth", "+42%")
-    col2.metric("Best Module", "Marketing AI")
-    col3.metric("Avg Productivity Gain", "31%")
+    col1.metric("Croissance", "+42%")
+    col2.metric("Meilleur module", "Marketing IA")
+    col3.metric("Gain productivité moyen", "31%")
 
-    st.success("Strong AI usage growth detected.")
+    st.success("Forte croissance d'utilisation détectée.")
+
 
 st.markdown("---")
-st.caption("Mameyl Labs AI — Simulated AI productivity platform built with Python and Streamlit.")
+st.caption("Mameyl Labs AI — Plateforme de productivité IA construite avec Python et Streamlit.")
