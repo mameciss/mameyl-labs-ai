@@ -1,8 +1,7 @@
 from openai import OpenAI
 import streamlit as st
 import pandas as pd
-if "messages" not in st.session_state:
-    st.session_state.messages = []
+
 st.set_page_config(
     page_title="Mameyl Labs AI",
     page_icon="✨",
@@ -11,9 +10,14 @@ st.set_page_config(
 
 client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-# =========================
-# STYLE
-# =========================
+if "chat_messages" not in st.session_state:
+    st.session_state.chat_messages = [
+        {
+            "role": "system",
+            "content": "Tu es un assistant IA professionnel spécialisé en business, marketing, productivité, entrepreneuriat, e-commerce, création de contenu et automatisation. Réponds toujours clairement en français."
+        }
+    ]
+
 st.markdown("""
 <style>
 .stApp {
@@ -22,7 +26,7 @@ st.markdown("""
 }
 
 [data-testid="stSidebar"] {
-    background: #050816;
+    background-color: #050816;
     border-right: 1px solid rgba(255,255,255,0.08);
 }
 
@@ -35,99 +39,97 @@ h1, h2, h3 {
     font-weight: 800;
 }
 
-p, li, label {
-    color: #D1D5DB;
-}
-
-.hero-card, .tool-card, .output-box {
-    background: rgba(17,24,39,0.88);
-    border: 1px solid rgba(255,255,255,0.10);
-    padding: 24px;
-    border-radius: 18px;
-    margin-bottom: 18px;
-}
-
-.output-box {
-    border-left: 5px solid #8B5CF6;
-    color: #E5E7EB;
-}
-
 .stButton>button {
-    background: linear-gradient(90deg, #7C3AED, #2563EB);
+    background: linear-gradient(135deg, #7C3AED, #2563EB);
     color: white;
     border: none;
-    border-radius: 12px;
-    padding: 0.7rem 1.2rem;
+    border-radius: 14px;
+    padding: 0.7rem 1.3rem;
     font-weight: 700;
 }
 
-.stTextArea textarea, .stTextInput input {
-    background-color: #0B1120;
+.output-box {
+    background: rgba(15, 23, 42, 0.95);
+    border-left: 5px solid #8B5CF6;
+    border-radius: 18px;
+    padding: 24px;
+    margin-top: 20px;
+    line-height: 1.7;
     color: white;
-    border-radius: 12px;
+}
+
+.hero {
+    background: linear-gradient(135deg, #2E1065, #172554);
+    padding: 50px;
+    border-radius: 28px;
+    border: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 30px;
+}
+
+[data-testid="stMetric"] {
+    background: transparent;
+}
+
+textarea, input, select {
+    color: white !important;
 }
 </style>
 """, unsafe_allow_html=True)
 
 
-# =========================
-# IA FUNCTION
-# =========================
-def ask_ai(system_prompt, user_prompt):
-    with st.spinner("L'IA réfléchit..."):
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ],
-            temperature=0.8
-        )
+def ask_ai(prompt, system_prompt="Tu es un assistant IA professionnel. Réponds clairement en français."):
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": prompt}
+        ]
+    )
     return response.choices[0].message.content
 
 
-# =========================
-# SIDEBAR
-# =========================
-st.sidebar.title("✨ IA de Mameyl Labs")
-st.sidebar.markdown("### Plateforme de productivité IA")
+with st.sidebar:
+    st.title("✨ IA de Mameyl Labs")
+    st.markdown("### Plateforme de productivité IA")
 
-page = st.sidebar.radio(
-    "Navigation",
-    [
-        "Tableau de bord",
-        "Chat IA",
-        "Marketing IA",
-        "IA commerciale",
-        "IA de contenu",
-        "Résumé",
-        "Analytique"
-    ]
-)
-
-st.sidebar.info("Plateforme d'assistant IA moderne construite avec Python et Streamlit.")
-
-
-# =========================
-# DASHBOARD
-# =========================
-if page == "Tableau de bord":
-    st.title("✨ Tableau de bord")
+    page = st.radio(
+        "Navigation",
+        [
+            "Tableau de bord",
+            "Chat IA",
+            "Marketing IA",
+            "IA commerciale",
+            "IA de contenu",
+            "Résumé",
+            "Analytique"
+        ]
+    )
 
     st.markdown("""
-<div class="hero-card">
-<h2>Mameyl Labs AI</h2>
-<p>Plateforme IA pour marketing, contenu, stratégie commerciale, résumé et productivité.</p>
-</div>
-""", unsafe_allow_html=True)
+    <div style="background:#0f2a4a;padding:18px;border-radius:12px;margin-top:25px;">
+    Plateforme d'assistant IA moderne construite avec Python et Streamlit.
+    </div>
+    """, unsafe_allow_html=True)
+
+
+if page == "Tableau de bord":
+    st.markdown("""
+    <div class="hero">
+        <h1>✨ IA de Mameyl Labs</h1>
+        <h2>Plateforme d'assistant IA moderne</h2>
+        <p>Une plateforme de productivité IA conçue pour le business, le marketing, le contenu, l'automatisation et l'aide à la décision.</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.header("Présentation de la plateforme")
 
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Requêtes IA", "1 284", "+32%")
-    col2.metric("Contenus générés", "642", "+21%")
-    col3.metric("Idées business", "118", "+14%")
-    col4.metric("Score productivité", "91%", "+9%")
+    col2.metric("Résultats générés", "642", "+21%")
+    col3.metric("Idées d'automatisation", "118", "+14%")
+    col4.metric("Score de productivité", "91%", "+9%")
 
-    st.markdown("## Modules IA")
+    st.header("Modules d'IA")
 
     modules = pd.DataFrame({
         "Module": [
@@ -139,12 +141,12 @@ if page == "Tableau de bord":
             "Analytique"
         ],
         "Objectif": [
-            "Assistant conversationnel avec mémoire",
-            "Campagnes, hooks, stratégie réseaux sociaux",
-            "Vente, fidélisation, scripts clients",
-            "Légendes, scripts, emails, descriptions",
-            "Résumé clair et structuré",
-            "Statistiques et performance"
+            "Assistant conversationnel",
+            "Stratégies marketing et campagnes",
+            "Recommandations business et ventes",
+            "Légendes, emails et descriptions",
+            "Résumé de textes et documents",
+            "Suivi d'utilisation et performance"
         ],
         "Statut": [
             "Actif",
@@ -152,235 +154,192 @@ if page == "Tableau de bord":
             "Actif",
             "Actif",
             "Actif",
-            "Bêta"
+            "Beta"
         ]
     })
 
     st.dataframe(modules, use_container_width=True)
 
 
-# =========================
-# CHAT IA AVEC MÉMOIRE
-# =========================
 elif page == "Chat IA":
     st.title("🤖 Chat IA Assistant")
 
-    if "messages" not in st.session_state:
-        st.session_state.messages = [
-            {
-                "role": "system",
-                "content": "Tu es un assistant IA professionnel spécialisé en business, marketing, productivité et entrepreneuriat. Réponds toujours clairement en français."
-            }
-        ]
-
-    for msg in st.session_state.messages:
-        if msg["role"] == "user":
-            st.markdown(f"**Vous :** {msg['content']}")
-        elif msg["role"] == "assistant":
+    for message in st.session_state.chat_messages:
+        if message["role"] == "user":
+            st.markdown(f"**Vous :** {message['content']}")
+        elif message["role"] == "assistant":
             st.markdown(f"""
-<div class="output-box">
-<strong>IA :</strong><br><br>{msg['content']}
-</div>
-""", unsafe_allow_html=True)
+            <div class="output-box">
+            <strong>IA :</strong><br><br>
+            {message['content']}
+            </div>
+            """, unsafe_allow_html=True)
 
     user_message = st.text_area("Votre message")
 
     if st.button("Envoyer") and user_message.strip():
-        st.session_state.messages.append({"role": "user", "content": user_message})
+        st.session_state.chat_messages.append(
+            {"role": "user", "content": user_message}
+        )
 
         with st.spinner("L'IA répond..."):
             response = client.chat.completions.create(
                 model="gpt-4o-mini",
-                messages=st.session_state.messages,
-                temperature=0.8
+                messages=st.session_state.chat_messages
             )
 
-        reply = response.choices[0].message.content
-        st.session_state.messages.append({"role": "assistant", "content": reply})
+            ai_response = response.choices[0].message.content
+
+        st.session_state.chat_messages.append(
+            {"role": "assistant", "content": ai_response}
+        )
+
         st.rerun()
 
     if st.button("Effacer la conversation"):
-        st.session_state.messages = [
+        st.session_state.chat_messages = [
             {
                 "role": "system",
-                "content": "Tu es un assistant IA professionnel spécialisé en business, marketing, productivité et entrepreneuriat. Réponds toujours clairement en français."
+                "content": "Tu es un assistant IA professionnel spécialisé en business, marketing, productivité, entrepreneuriat, e-commerce, création de contenu et automatisation. Réponds toujours clairement en français."
             }
         ]
         st.rerun()
 
 
-# =========================
-# MARKETING IA
-# =========================
 elif page == "Marketing IA":
-    st.title("📈 Générateur Marketing IA")
+    st.title("📈 Générateur de stratégie marketing IA")
 
-    marque = st.text_input("Nom de la marque ou du produit")
-    plateforme = st.selectbox("Plateforme", ["Instagram", "TikTok", "Facebook", "LinkedIn"])
-    ton = st.selectbox("Ton", ["Premium", "Amical", "Professionnel", "Audacieux", "Luxe"])
-    objectif = st.text_area("Objectif marketing")
+    product = st.text_input("Nom de la marque ou du produit")
+    platform = st.selectbox("Plateforme", ["Instagram", "TikTok", "Facebook", "LinkedIn", "WhatsApp"])
+    tone = st.selectbox("Ton", ["Premium", "Simple", "Luxe", "Professionnel", "Amical", "Audacieux"])
+    goal = st.text_area("Objectif marketing")
 
     if st.button("Générer une stratégie marketing"):
         prompt = f"""
-Marque/produit : {marque}
-Plateforme : {plateforme}
-Ton : {ton}
-Objectif : {objectif}
+        Crée une stratégie marketing complète pour :
+        Produit ou marque : {product}
+        Plateforme : {platform}
+        Ton : {tone}
+        Objectif : {goal}
 
-Crée une vraie stratégie marketing complète, concrète et exploitable.
-Inclure :
-- objectif de campagne
-- concept créatif
-- audience cible
-- 5 hooks
-- 3 idées de publications
-- 2 idées de vidéos
-- CTA
-- calendrier de publication sur 7 jours
-- conseils pour améliorer la conversion
-"""
+        Donne :
+        - concept de campagne
+        - idées de contenu
+        - hooks
+        - calendrier simple
+        - CTA
+        - recommandations concrètes
+        """
 
-        reply = ask_ai(
-            "Tu es un expert marketing digital premium spécialisé en réseaux sociaux, branding, campagnes et conversion.",
-            prompt
-        )
+        with st.spinner("Génération de la stratégie marketing..."):
+            result = ask_ai(prompt)
 
         st.markdown(f"""
-<div class="output-box">
-{reply}
-</div>
-""", unsafe_allow_html=True)
+        <div class="output-box">
+        {result}
+        </div>
+        """, unsafe_allow_html=True)
 
 
-# =========================
-# IA COMMERCIALE
-# =========================
 elif page == "IA commerciale":
     st.title("💼 Assistant IA Commercial")
 
-    industrie = st.selectbox("Industrie", ["Beauté", "Technologie", "E-commerce", "Mode", "Éducation", "Services"])
-    demande = st.text_area("Objectif commercial ou demande")
+    industry = st.selectbox("Industrie", ["Beauté", "E-commerce", "Technologie", "Éducation", "Livraison", "Mode"])
+    request = st.text_area("Objectif commercial ou demande")
 
     if st.button("Générer une stratégie commerciale"):
         prompt = f"""
-Industrie : {industrie}
-Demande : {demande}
+        Tu es un expert en stratégie commerciale.
+        Industrie : {industry}
+        Demande : {request}
 
-Réponds comme un expert commercial.
-Selon la demande, produis une réponse adaptée :
-- stratégie de vente
-- fidélisation
-- script WhatsApp
-- gestion des objections
-- closing
-- acquisition client
-- offres promotionnelles
+        Donne :
+        - stratégie de vente
+        - acquisition client
+        - script WhatsApp
+        - gestion des objections
+        - closing
+        - offres promotionnelles intelligentes
+        - KPIs à suivre
+        """
 
-La réponse doit être concrète, utile, prête à utiliser.
-"""
-
-        reply = ask_ai(
-            "Tu es un directeur commercial IA spécialisé en ventes, fidélisation, acquisition client, scripts WhatsApp et conversion.",
-            prompt
-        )
+        with st.spinner("Génération de la stratégie commerciale..."):
+            result = ask_ai(prompt)
 
         st.markdown(f"""
-<div class="output-box">
-{reply}
-</div>
-""", unsafe_allow_html=True)
+        <div class="output-box">
+        {result}
+        </div>
+        """, unsafe_allow_html=True)
 
 
-# =========================
-# IA DE CONTENU
-# =========================
 elif page == "IA de contenu":
     st.title("✍️ Générateur de contenu IA")
 
-    type_contenu = st.selectbox(
+    content_type = st.selectbox(
         "Type de contenu",
-        [
-            "Légende Instagram",
-            "Script TikTok",
-            "Email marketing",
-            "Description produit",
-            "Texte publicitaire",
-            "Post Facebook"
-        ]
+        ["Légende Instagram", "Post LinkedIn", "Email", "Description produit", "Script TikTok", "Message WhatsApp"]
     )
 
-    sujet = st.text_input("Sujet")
-    ton = st.selectbox("Ton du contenu", ["Premium", "Simple", "Émotionnel", "Professionnel", "Viral"])
+    topic = st.text_input("Sujet")
+    tone = st.selectbox("Ton du contenu", ["Simple", "Premium", "Professionnel", "Émotionnel", "Luxe", "Viral"])
 
     if st.button("Générer du contenu"):
         prompt = f"""
-Type de contenu : {type_contenu}
-Sujet : {sujet}
-Ton : {ton}
+        Crée un contenu de type : {content_type}
+        Sujet : {topic}
+        Ton : {tone}
 
-Crée le contenu directement.
-Ne donne pas des conseils.
-Ne dis pas quoi faire.
-Écris le texte final prêt à publier ou utiliser.
-Ajoute CTA et hashtags si pertinent.
-"""
+        Le contenu doit être clair, professionnel, engageant et adapté à la plateforme.
+        Ajoute un CTA si pertinent.
+        """
 
-        reply = ask_ai(
-            "Tu es un créateur de contenu expert en beauté, business, réseaux sociaux, storytelling et copywriting.",
-            prompt
-        )
+        with st.spinner("Création du contenu..."):
+            result = ask_ai(prompt)
 
         st.markdown(f"""
-<div class="output-box">
-{reply}
-</div>
-""", unsafe_allow_html=True)
+        <div class="output-box">
+        {result}
+        </div>
+        """, unsafe_allow_html=True)
 
 
-# =========================
-# RÉSUMÉ
-# =========================
 elif page == "Résumé":
     st.title("🧠 Résumeur intelligent")
 
-    texte = st.text_area("Collez le texte à résumer")
-    style = st.selectbox("Style de résumé", ["Court", "Détaillé", "En 3 points", "Professionnel"])
+    text = st.text_area("Collez le texte à résumer", height=220)
+    style = st.selectbox("Style de résumé", ["Court", "En 3 points", "Professionnel", "Très détaillé"])
 
-    if st.button("Résumer"):
+    if st.button("Résumer") and text.strip():
         prompt = f"""
-Texte à résumer :
-{texte}
+        Résume le texte suivant en français.
 
-Style demandé : {style}
+        Style demandé : {style}
 
-Fais un vrai résumé clair du texte.
-Garde seulement les idées importantes.
-Ne parle pas du résumé : produis directement le résumé.
-"""
+        Texte :
+        {text}
 
-        reply = ask_ai(
-            "Tu es un expert en synthèse, résumé professionnel et clarification de texte.",
-            prompt
-        )
+        Le résumé doit être clair, structuré et utile.
+        """
+
+        with st.spinner("Résumé en cours..."):
+            result = ask_ai(prompt)
 
         st.markdown(f"""
-<div class="output-box">
-<strong>Résumé :</strong><br><br>
-{reply}
-</div>
-""", unsafe_allow_html=True)
+        <div class="output-box">
+        <strong>Résumé :</strong><br><br>
+        {result}
+        </div>
+        """, unsafe_allow_html=True)
 
 
-# =========================
-# ANALYTIQUE
-# =========================
 elif page == "Analytique":
     st.title("📊 Analytique IA")
 
     data = pd.DataFrame({
         "Mois": ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin"],
         "Requêtes IA": [120, 240, 310, 460, 620, 850],
-        "Contenus générés": [80, 160, 220, 330, 470, 642]
+        "Résultats générés": [80, 160, 220, 330, 470, 640]
     })
 
     st.line_chart(data.set_index("Mois"))
@@ -388,10 +347,14 @@ elif page == "Analytique":
     col1, col2, col3 = st.columns(3)
     col1.metric("Croissance", "+42%")
     col2.metric("Meilleur module", "Marketing IA")
-    col3.metric("Gain productivité moyen", "31%")
+    col3.metric("Gain moyen", "31%")
 
-    st.success("Forte croissance d'utilisation détectée.")
+    st.success("Forte croissance de l'utilisation de l'IA détectée.")
 
 
-st.markdown("---")
-st.caption("Mameyl Labs AI — Plateforme de productivité IA construite avec Python et Streamlit.")
+st.markdown("""
+<hr>
+<p style="color:gray;">
+Mameyl Labs AI — Plateforme de productivité IA construite avec Python, Streamlit et OpenAI.
+</p>
+""", unsafe_allow_html=True)
