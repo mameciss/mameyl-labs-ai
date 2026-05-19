@@ -164,8 +164,8 @@ if page == "Tableau de bord":
 elif page == "Chat IA":
     st.title("🤖 Chat IA Assistant")
 
-    for message in st.session_state.chat_messages:
-
+for message in st.session_state.chat_messages:
+    if message["role"] != "system":
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
