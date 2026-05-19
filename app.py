@@ -164,10 +164,10 @@ if page == "Tableau de bord":
 elif page == "Chat IA":
     st.title("🤖 Chat IA Assistant")
 
-for message in st.session_state.chat_messages:
-    if message["role"] != "system":
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+    for message in st.session_state.chat_messages:
+        if message["role"] != "system":
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
 
     prompt = st.chat_input("Écrivez votre message...")
 
@@ -208,7 +208,6 @@ for message in st.session_state.chat_messages:
         ]
 
         st.rerun()
-
 elif page == "Marketing IA":
     st.title("📈 Générateur de stratégie marketing IA")
 
