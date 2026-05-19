@@ -165,24 +165,23 @@ elif page == "Chat IA":
     st.title("🤖 Chat IA Assistant")
 
     for message in st.session_state.chat_messages:
-        if message["role"] == "user":
-            st.markdown(f"**Vous :** {message['content']}")
-        elif message["role"] == "assistant":
-            st.markdown(f"""
-            <div class="output-box">
-            <strong>IA :</strong><br><br>
-            {message['content']}
-            </div>
-            """, unsafe_allow_html=True)
 
-    user_message = st.text_area("Votre message")
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
 
-    if st.button("Envoyer") and user_message.strip():
+    prompt = st.chat_input("Écrivez votre message...")
+
+    if prompt:
+
         st.session_state.chat_messages.append(
-            {"role": "user", "content": user_message}
+            {"role": "user", "content": prompt}
         )
 
-        with st.spinner("L'IA répond..."):
+        with st.chat_message("user"):
+            st.markdown(prompt)
+
+        with st.spinner("✨ Génération en cours..."):
+
             response = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=st.session_state.chat_messages
@@ -194,17 +193,21 @@ elif page == "Chat IA":
             {"role": "assistant", "content": ai_response}
         )
 
+        with st.chat_message("assistant"):
+            st.markdown(ai_response)
+
         st.rerun()
 
     if st.button("Effacer la conversation"):
+
         st.session_state.chat_messages = [
             {
                 "role": "system",
                 "content": "Tu es un assistant IA professionnel spécialisé en business, marketing, productivité, entrepreneuriat, e-commerce, création de contenu et automatisation. Réponds toujours clairement en français."
             }
         ]
-        st.rerun()
 
+        st.rerun()
 
 elif page == "Marketing IA":
     st.title("📈 Générateur de stratégie marketing IA")
