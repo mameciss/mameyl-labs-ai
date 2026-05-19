@@ -1,7 +1,8 @@
 from openai import OpenAI
 import streamlit as st
 import pandas as pd
-
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 st.set_page_config(
     page_title="Mameyl Labs AI",
     page_icon="✨",
